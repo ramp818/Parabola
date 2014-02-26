@@ -1,6 +1,8 @@
 
 package parabola;
 
+import javax.swing.JFrame;
+
 /**
  *
  * @autores Ruben Martinez Pacheco, Angel Gonzalez
@@ -11,7 +13,9 @@ public class Parabola {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        ParabolaJFrame juego = new ParabolaJFrame();
+    	juego.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	juego.setVisible(true);
     }
     
 }
