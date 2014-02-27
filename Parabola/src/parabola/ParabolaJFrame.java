@@ -27,25 +27,26 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
 	private Graphics dbg;	// Objeto grafico
 	private SoundClip explosion;    // Objeto AudioClip
         private SoundClip beep;
-	private Lanzado pelota;    // Objeto de la clase Planeta
-	private Atrapador mario;    //Objeto de la clase meteroito
+	private Lanzado pelota;    // Objeto de la clase Lanzado
+	private Atrapador mario;    //Objeto de la clase Atrapador
 	private boolean choco;
         private boolean colision;
         private boolean pausa;
+        private boolean instrucciones;
         private boolean click;
         private Animacion animPelota;
         private Animacion animMario;
         private long tiempoActual;
 	private long tiempoInicial;
-        private int velVenom;
         private int ultDireccion;
-        private final int MINV=12;
-        private final int MAXV=16;
-        private int TAM;
+        private int vidas;
+        private int bolaPerdida;
         
         public ParabolaJFrame(){
             
                 direccion=0;
+                vidas=5;
+                bolaPerdida=0;
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -99,7 +100,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
         public void run () {
 		while (true) {
 			actualiza();
-			//checaColision();
+			checaColision();
 			repaint();    // Se actualiza el <code>Applet</code> repintando el contenido.
 			try	{
 				// El thread se duerme.
@@ -142,6 +143,40 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
             
             
                 }
+        }
+        
+        /**
+	 * Metodo usado para checar las colisiones del objeto planeta y meteorito
+	 * con las orillas del <code>JFrame</code>.
+	 */
+        public void checaColision(){
+            
+            if (mario.getPosX() + mario.getAncho() > getWidth()) {
+                     mario.setPosX(getWidth()-mario.getAncho());
+                }
+                 
+                if (mario.getPosX() < 0) {
+			mario.setPosX(0);
+		}
+                
+		if (mario.getPosY() + mario.getAlto() > getHeight()) {
+			mario.setPosY(getHeight()-mario.getAlto());
+		}
+                
+                if (mario.getPosY() < 0) {
+                     mario.setPosY(0);  
+                }
+                
+            if(pelota.getPosY() + pelota.getAlto() > getHeight()){
+                
+                pelota.setPosX(720);
+                pelota.setPosY(150);
+                bolaPerdida+=1;
+                if(bolaPerdida==3){
+                    vidas-=1;
+                    bolaPerdida=0;
+                }
+            }
         }
       
         /**
@@ -186,8 +221,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                                      g.drawImage(pelota.getAnimacion().getImagen(), pelota.getPosX(), pelota.getPosY(), this);
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
-                                     g.setColor(Color.black);
-                                     g.drawString("PAUSA", 200, 500);
+                                     g.drawString("Vidas: " + vidas, 30,65);
                             }
                             else {
 
@@ -204,6 +238,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                                      g.drawImage(pelota.getAnimacion().getImagen(), pelota.getPosX(), pelota.getPosY(), this);
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
+                                     g.drawString("Vidas: " + vidas, 30,65);
+                                     g.drawString("PAUSA", 100, 100);
                                     
                     }
                 }
@@ -220,18 +256,20 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
     public void keyPressed(KeyEvent e) {
         
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {    //Presiono flecha derecha
+                
                 direccion = 1;
-                click=false;
-                ultDireccion=1;
             } 
             else if (e.getKeyCode() == KeyEvent.VK_LEFT) {    //Presiono tecla A izquierda
-                direccion = 2;
-                click=false;
-                ultDireccion=2;
                 
+                direccion = 2;
             }
             else if (e.getKeyCode() == KeyEvent.VK_P){
+                
                 pausa=!pausa;
+            }
+            else if(e.getKeyCode() == KeyEvent.VK_I){
+                
+                instrucciones=!instrucciones;
             }
         
     }
