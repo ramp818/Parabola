@@ -11,7 +11,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, MouseListener, MouseMotionListener
+public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, MouseListener, MouseMotionListener
 {
     
         private static final long serialVersionUID = 1L;
@@ -47,6 +47,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                 direccion=0;
                 vidas=5;
                 bolaPerdida=0;
+                pausa=false;
+                instrucciones=false;
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -77,12 +79,15 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                 
                 mario=new Atrapador(400,250,animMario);
                 pelota= new Lanzado(720,150,animPelota);
+                
+                beep = new SoundClip("sonidos/beep.wav");
+                explosion = new SoundClip("sonidos/explosion.wav");
             
                 setBackground(Color.white);
                 setSize(800,500);
                 addKeyListener(this);
-                //addMouseMotionListener(this);
-                //addMouseListener(this);
+                addMouseMotionListener(this);
+                addMouseListener(this);
             
                 Thread th = new Thread (this);
 		// Empieza el hilo
@@ -119,15 +124,13 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
         
         public void actualiza() {
             
-            if(!(pausa)){
+            if(!pausa){
             
                 long tiempoTranscurrido= System.currentTimeMillis() - tiempoActual;
                 tiempoActual += tiempoTranscurrido;
                 animMario.actualiza(tiempoTranscurrido);
                 animPelota.actualiza(tiempoTranscurrido);
                 //Dependiendo de la direccion del bueno es hacia donde se mueve.
-                if(!click){
-                    
                 switch(direccion){
                     case 1: {
                         mario.setPosX(mario.getPosX() + 2);
@@ -139,10 +142,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                     }
                 }
                 
-                }
-            
-            
-                }
+            }
         }
         
         /**
@@ -171,6 +171,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                 
                 pelota.setPosX(720);
                 pelota.setPosY(150);
+                explosion.play();
                 bolaPerdida+=1;
                 if(bolaPerdida==3){
                     vidas-=1;
@@ -213,7 +214,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
 	 */
 	public void paint1(Graphics g) {
                     
-                    if(!(pausa)){
+                    if(!pausa){
                             if(mario != null && pelota != null){
                                      //Dibuja la imagen en la posicion actualizada, dibuja el puntaje 
                                      //y despliega la imagen al terminar el juego
@@ -243,7 +244,25 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
                                     
                     }
                 }
-       }
+                
+                if(instrucciones){
+                            if(mario != null && pelota != null){
+                                     //Dibuja la imagen en la posicion actualizada, dibuja el puntaje 
+                                     //y despliega la imagen al terminar el juego
+                                     g.drawImage(mario.getAnimacion().getImagen(), mario.getPosX(),mario.getPosY(), this);
+                                     g.drawImage(pelota.getAnimacion().getImagen(), pelota.getPosX(), pelota.getPosY(), this);
+                                     g.setColor(Color.black);
+                                     g.drawString("Puntos: " + puntos, 30, 50);
+                                     g.drawString("Vidas: " + vidas, 30,65);
+                                     g.drawString("ATRAPA LA PELOTA",100,100);
+                            }
+                            else {
+
+                            //Da un mensaje mientras se carga el dibujo
+                            g.drawString("No se cargo la imagen..",20,20);
+                        }
+               }
+}
        
       /**
      * Metodo <I>keyPressed</I> sobrescrito de la interface
@@ -270,6 +289,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
             else if(e.getKeyCode() == KeyEvent.VK_I){
                 
                 instrucciones=!instrucciones;
+            }
+            else if(e.getKeyCode() == KeyEvent.VK_S){
+                
+                beep.stop();
+                explosion.stop();
             }
         
     }
@@ -300,5 +324,59 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener //, 
         
     }
     
+    /**
+	 * Metodo <I>mouseClicked</I> sobrescrito de la interface <code>MouseListener</code>.<P>
+	 * En este metodo maneja el evento que se genera al presionar el mouse.
+	 * @param e es el <code>evento</code> generado al presionar el mouse.
+	 */
+	public void mouseClicked(MouseEvent e) {
+    }
+    
+        /**
+	 * Metodo <I>mouseEntered</I> sobrescrito de la interface <code>MouseListener</code>.<P>
+	 * En este metodo maneja el evento que se genera cuando el cursor entra en un componente
+	 * @param e es el <code>evento</code> que se genera al entrar al area del objeto.
+	 */
+    public void mouseEntered(MouseEvent e){
+    	
+    }
+    
+    /**
+	 * Metodo <I>mouseExited</I> sobrescrito de la interface <code>MouseListener</code>.<P>
+	 * En este metodo maneja el evento que se genera al abandonar el area del objeto seleccionado con el cursor;
+	 * @param e es el <code>evento</code> que se genera en al soltar las teclas.
+	 */
+    public void mouseExited(MouseEvent e){
+    	
+    }
+    
+    /**
+	 * Metodo <I>mousePressed</I> sobrescrito de la interface <code>MouseListener</code>.<P>
+	 * En este metodo maneja el evento que se genera al presionar con el cursor el componente
+	 * @param e es el <code>evento</code> que se genera en al soltar las teclas.
+	 */
+    public void mousePressed(MouseEvent e){
+         if (pelota.contiene(e.getX(), e.getY()) && !click) {
+            click = true;
+        }
+    }
+    
+    /**
+	 * Metodo <I>mouseReleased</I> sobrescrito de la interface <code>MouseListener</code>.<P>
+	 * En este metodo maneja el evento que se genera al soltar el boton del mouse.
+	 * @param e es el <code>evento</code> que se genera al soltar el boton del mouse
+	 */
+    public void mouseReleased(MouseEvent e){
+        click=false;
+    	
+    }
+    
+    public void mouseMoved(MouseEvent e){
+        
+    }
+    
+    public void mouseDragged(MouseEvent e){
+       
+    }
 
 }
