@@ -10,7 +10,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import javax.swing.JOptionPane;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
@@ -18,7 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -264,7 +262,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
                                      g.drawString("Vidas: " + vidas, 30,65);
-                                     g.drawString("PAUSA", 100, 100);
+                                     g.drawString("PAUSA", 370, 250);
                                     
                     }
                 }
@@ -278,7 +276,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
                                      g.drawString("Vidas: " + vidas, 30,65);
-                                     g.drawString("ATRAPA LA PELOTA",100,100);
+                                     g.drawString("ATRAPA LA PELOTA",370,250);
                             }
                             else {
 
@@ -326,6 +324,13 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                     Logger.getLogger(ParabolaJFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            else if(e.getKeyCode() == KeyEvent.VK_C){
+                try {
+                    leeArchivo();
+                } catch (IOException ex) {
+                    Logger.getLogger(ParabolaJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         
     }
 
@@ -339,7 +344,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
      * teclas.
      */
     public void keyTyped(KeyEvent e) {
-
+       
     }
 
     /**
@@ -352,7 +357,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
      */
     
     public void keyReleased(KeyEvent e) {
-        
+        direccion=0;
     }
     
     /**
@@ -410,11 +415,56 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
        
     }
     
-     public void grabaArchivo() throws IOException {
+    public void grabaArchivo() throws IOException {
                                                           
                 PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));  
-                fileOut.println(mario.getPosX() + " " +mario.getPosY());
+                fileOut.println(puntos + "\n" + vidas + "\n" + mario.getPosX() + "\n" + mario.getPosY() + "\n" + pelota.getPosX()+ "\n" + pelota.getPosY());
                 fileOut.close();
+    }
+    
+    public void leeArchivo() throws IOException {
+                                                          
+                BufferedReader fileIn;
+                try {
+                   fileIn = new BufferedReader(new FileReader(nombreArchivo));
+                
+                   int linea=1;
+                   String dato=fileIn.readLine();
+                   while(dato !=null){
+                      
+                       switch(linea){
+                            case 1: {
+                               puntos=(Integer.parseInt(dato)); 
+                            break;
+                            }
+                            case 2: {
+                                vidas=(Integer.parseInt(dato)); 
+                            break;
+                            }
+                            case 3:{
+                                mario.setPosX((Integer.parseInt(dato)));
+                            break;
+                            }
+                            case 4:{
+                                mario.setPosY((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 5:{
+                                pelota.setPosX((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 6:{
+                                pelota.setPosY((Integer.parseInt(dato))); 
+                            break;
+                            }
+                    }
+                    
+                       dato=fileIn.readLine();
+                       linea+=1;
+                   }
+                    fileIn.close();
+                } catch (FileNotFoundException e){
         }
 
+}
 }
