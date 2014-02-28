@@ -282,7 +282,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
                                      g.drawString("Vidas: " + vidas, 30,65);
-                                     g.drawString("ATRAPA LA PELOTA",370,250);
+                                     g.drawString("ATRAPA LA PELOTA\n" + "G=Guardar Juego" + "\n",370,250);
                             }
                             else {
 
@@ -290,7 +290,15 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                             g.drawString("No se cargo la imagen..",20,20);
                         }
                }
-}
+               if(vidas<0){
+                  
+                  g.setColor(Color.black);
+                  g.drawString("Terminaste con puntos: " + puntos, 370, 300);
+                  g.drawString("MADE BY: Ruben Mtz y Angel GZZ",370,250);
+                  
+                  
+               }
+               }
        
       /**
      * Metodo <I>keyPressed</I> sobrescrito de la interface
