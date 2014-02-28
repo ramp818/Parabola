@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.FileWriter;
@@ -60,7 +59,6 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 pausa=false;
                 instrucciones=false;
                 nombreArchivo="Juego.txt";
-                
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -152,8 +150,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                         mario.setPosX(mario.getPosX() - 2);
                         break;
                     }
-                }
-                
+                }   
             }
         }
         
