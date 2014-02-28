@@ -25,8 +25,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
         private static final long serialVersionUID = 1L;
 	// Se declaran las variables.
 	private int direccion;    // Direccion
-        private int posX;
-        private int posY;
+        private int posXPelota;
+        private int posYPelota;
         private int puntos;
 	private final int MIN = 3;    //Minimo al generar un numero al azar.
 	private final int MAX = 6;    //Maximo al generar un numero al azar.
@@ -42,6 +42,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
         private boolean pausa;
         private boolean instrucciones;
         private boolean click;
+        private boolean sonido;
         private Animacion animPelota;
         private Animacion animMario;
         private long tiempoActual;
@@ -59,6 +60,9 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 pausa=false;
                 instrucciones=false;
                 nombreArchivo="Juego.txt";
+                posXPelota=50;
+                posYPelota=200;
+                sonido=true;
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -88,7 +92,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 animMario.sumaCuadro(mario6,100);
                 
                 mario=new Atrapador(400,400,animMario);
-                pelota= new Lanzado(100,100,animPelota);
+                pelota= new Lanzado(posXPelota,posYPelota,animPelota);
                 
                 beep = new SoundClip("sonidos/beep.wav");
                 explosion = new SoundClip("sonidos/explosion.wav");
@@ -134,7 +138,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
         
         public void actualiza() {
             
-            if(!pausa){
+            if(vidas>0){
             
                 long tiempoTranscurrido= System.currentTimeMillis() - tiempoActual;
                 tiempoActual += tiempoTranscurrido;
@@ -150,7 +154,12 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                         mario.setPosX(mario.getPosX() - 2);
                         break;
                     }
-                }   
+                }
+               if(click){
+                   
+                   pelota.setPosX(pelota.getPosX());
+                   pelota.setPosY(pelota.getPosY() +2);
+               }
             }
         }
         
@@ -180,7 +189,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 
                 pelota.setPosX(100);
                 pelota.setPosY(100);
-                explosion.play();
+                if(sonido)explosion.play();
                 bolaPerdida+=1;
                 if(bolaPerdida==3){
                     vidas-=1;
@@ -190,9 +199,9 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 //Colision entre objetos
                 if(mario.intersecta(pelota)){
                     
-                    pelota.setPosX(100);
-                    pelota.setPosY(100);
-                    beep.play();
+                    pelota.setPosX(posXPelota);
+                    pelota.setPosY(posYPelota);
+                    if(sonido)beep.play();
                     puntos+=2;
                 }
             
@@ -311,8 +320,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
             }
             else if(e.getKeyCode() == KeyEvent.VK_S){
                 
-                beep.stop();
-                explosion.stop();
+                sonido=!sonido;
             }
             else if(e.getKeyCode() == KeyEvent.VK_G){
                 try {
