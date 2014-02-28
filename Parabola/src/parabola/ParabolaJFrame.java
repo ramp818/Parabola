@@ -10,6 +10,17 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import javax.swing.JOptionPane;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, MouseListener, MouseMotionListener
 {
@@ -41,6 +52,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
         private int ultDireccion;
         private int vidas;
         private int bolaPerdida;
+        private String nombreArchivo;
         
         public ParabolaJFrame(){
             
@@ -49,6 +61,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 bolaPerdida=0;
                 pausa=false;
                 instrucciones=false;
+                nombreArchivo="Juego.txt";
+                
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -77,8 +91,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 animMario.sumaCuadro(mario5,100);
                 animMario.sumaCuadro(mario6,100);
                 
-                mario=new Atrapador(400,250,animMario);
-                pelota= new Lanzado(720,150,animPelota);
+                mario=new Atrapador(400,400,animMario);
+                pelota= new Lanzado(100,100,animPelota);
                 
                 beep = new SoundClip("sonidos/beep.wav");
                 explosion = new SoundClip("sonidos/explosion.wav");
@@ -169,15 +183,25 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 
             if(pelota.getPosY() + pelota.getAlto() > getHeight()){
                 
-                pelota.setPosX(720);
-                pelota.setPosY(150);
+                pelota.setPosX(100);
+                pelota.setPosY(100);
                 explosion.play();
                 bolaPerdida+=1;
                 if(bolaPerdida==3){
                     vidas-=1;
                     bolaPerdida=0;
                 }
-            }
+                
+                //Colision entre objetos
+                if(mario.intersecta(pelota)){
+                    
+                    pelota.setPosX(100);
+                    pelota.setPosY(100);
+                    beep.play();
+                    puntos+=2;
+                }
+            
+        }
         }
       
         /**
@@ -186,7 +210,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * En este metodo lo que hace es actualizar el contenedor
 	 * @param g es el <code>objeto grafico</code> usado para dibujar.
 	 */
-	public void paint(Graphics g) {
+	public void paint(Graphics g){
 		// Inicializan el DoubleBuffer
 		if (dbImage == null){
 			dbImage = createImage (this.getSize().width, this.getSize().height);
@@ -295,6 +319,13 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 beep.stop();
                 explosion.stop();
             }
+            else if(e.getKeyCode() == KeyEvent.VK_G){
+                try {
+                    grabaArchivo();
+                } catch (IOException ex) {
+                    Logger.getLogger(ParabolaJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         
     }
 
@@ -378,5 +409,12 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
     public void mouseDragged(MouseEvent e){
        
     }
+    
+     public void grabaArchivo() throws IOException {
+                                                          
+                PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));  
+                fileOut.println(mario.getPosX() + " " +mario.getPosY());
+                fileOut.close();
+        }
 
 }
