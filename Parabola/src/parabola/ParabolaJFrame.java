@@ -299,10 +299,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                                      //y despliega la imagen al terminar el juego
                                      g.drawImage(mario.getAnimacion().getImagen(), mario.getPosX(),mario.getPosY(), this);
                                      g.drawImage(pelota.getAnimacion().getImagen(), pelota.getPosX(), pelota.getPosY(), this);
-                                     g.setColor(Color.black);
+                                     
                                      g.drawString("Puntos: " + puntos, 30, 50);
                                      g.drawString("Vidas: " + vidas, 30,65);
-                                     g.drawString("PAUSA", 370, 250);
+                                     g.setColor(Color.red);
+                                     g.drawString("PAUSA", 500, 350);
                                     
                     }
                 }
@@ -382,6 +383,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 } catch (IOException ex) {
                     Logger.getLogger(ParabolaJFrame.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                if (move==1){
+                    if(!movido){
+                    click = true;
+                }
+                }
             }
         
     }
@@ -418,9 +424,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * @param e es el <code>evento</code> generado al presionar el mouse.
 	 */
 	public void mouseClicked(MouseEvent e) {
-            
+            move=1;
             if (pelota.contiene(e.getX(), e.getY())) {
-                
                 if(!movido){
                     click = true;
                 }
@@ -474,9 +479,6 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
     public void grabaArchivo() throws IOException {
                                                           
                 PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
-                if(click){
-                    move=1;
-                }
                 fileOut.println(puntos + "\n" + vidas + "\n" + mario.getPosX() + "\n" + mario.getPosY() + "\n" + pelota.getPosX()+ "\n" + pelota.getPosY()+ "\n" + pelota.getVelocidadX()+ "\n" + pelota.getVelocidadY()+ "\n" + bolaPerdida + move);
                 fileOut.close();
     }
@@ -530,9 +532,6 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                             }
                             case 10:{
                                 move=((Integer.parseInt(dato)));
-                                if(move==1){
-                                    click = true;
-                                }
                             break;
                             }
                     }
