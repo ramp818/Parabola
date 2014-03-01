@@ -113,5 +113,4 @@ public class Base {
         public boolean contiene(int posX,int posY){
             return getPerimetro().contains(posX,posY);
         }
-    
 }

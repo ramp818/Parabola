@@ -41,6 +41,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
         private boolean colision;
         private boolean pausa;
         private boolean instrucciones;
+        private boolean movido;
+        private int velocidad;
+        private int gravedad;
+        private int vX;
+        private int vY;
         private boolean click;
         private boolean sonido;
         private Animacion animPelota;
@@ -49,6 +54,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	private long tiempoInicial;
         private int ultDireccion;
         private int vidas;
+        private int move=0;
         private int bolaPerdida;
         private String nombreArchivo;
         
@@ -61,8 +67,12 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 instrucciones=false;
                 nombreArchivo="Juego.txt";
                 posXPelota=50;
-                posYPelota=200;
+                posYPelota=450;
+                gravedad = 1;
+                vX = (int)(Math.random() * 5 + 13); // posiciones de velocidad x
+                vY = (int)(Math.random() * 12 + 15); //posiciones de velocidad y
                 sonido=true;
+                movido=false;
                 Image pelota0 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola1.png"));
                 Image pelota1 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola2.png"));
                 Image pelota2 = Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("imagenes/Bola3.png"));
@@ -91,14 +101,14 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                 animMario.sumaCuadro(mario5,100);
                 animMario.sumaCuadro(mario6,100);
                 
-                mario=new Atrapador(400,400,animMario);
-                pelota= new Lanzado(posXPelota,posYPelota,animPelota);
+                mario=new Atrapador(400,500,animMario);
+                pelota= new Lanzado(posXPelota,posYPelota,animPelota, vX, vY);
                 
                 beep = new SoundClip("sonidos/beep.wav");
                 explosion = new SoundClip("sonidos/explosion.wav");
             
                 setBackground(Color.white);
-                setSize(800,500);
+                setSize(1005,600);
                 addKeyListener(this);
                 addMouseMotionListener(this);
                 addMouseListener(this);
@@ -117,7 +127,9 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
      * 
      */
         public void run () {
-		while (true) {
+		
+            tiempoActual = System.currentTimeMillis();
+            while (true) {
 			actualiza();
 			checaColision();
 			repaint();    // Se actualiza el <code>Applet</code> repintando el contenido.
@@ -136,32 +148,44 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * 
 	 */
         
-        public void actualiza() {
-            
+        public void actualiza() {  
+          if(!pausa){  
             if(vidas>0){
-            
-                long tiempoTranscurrido= System.currentTimeMillis() - tiempoActual;
+                if (pelota.getPosX() != 50 || pelota.getPosY() != getHeight() - 100) {
+                     movido = false;
+                }
+         
+                 //Determina el tiempo que ha transcurrido desde que el Applet inicio su ejecución
+                long tiempoTranscurrido = System.currentTimeMillis() - tiempoActual;
+         
+                 //Guarda el tiempo actual
+                tiempoActual += tiempoTranscurrido;
+                 //Actualiza la animación con base en el tiempo transcurrido para cada malo
+                 if (click) {
+                     animPelota.actualiza(tiempoTranscurrido);
+                 }
                 tiempoActual += tiempoTranscurrido;
                 animMario.actualiza(tiempoTranscurrido);
-                animPelota.actualiza(tiempoTranscurrido);
+                //animPelota.actualiza(tiempoTranscurrido);
                 //Dependiendo de la direccion del bueno es hacia donde se mueve.
                 switch(direccion){
                     case 1: {
-                        mario.setPosX(mario.getPosX() + 2);
+                        mario.setPosX(mario.getPosX() + 15);
                         break;
                     }
                     case 2: {
-                        mario.setPosX(mario.getPosX() - 2);
+                        mario.setPosX(mario.getPosX() - 15);
                         break;
                     }
                 }
-               if(click){
-                   
-                   pelota.setPosX(pelota.getPosX());
-                   pelota.setPosY(pelota.getPosY() +2);
-               }
-            }
+                }
+            if (click) { // si click es true hara movimiento parabolico
+             pelota.setPosX(pelota.getPosX() + pelota.getVelocidadX());
+             pelota.setPosY(pelota.getPosY() - pelota.getVelocidadY());
+             pelota.setVelocidadY(pelota.getVelocidadY() - gravedad);
+         }
         }
+       }
         
         /**
 	 * Metodo usado para checar las colisiones del objeto planeta y meteorito
@@ -173,8 +197,8 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                      mario.setPosX(getWidth()-mario.getAncho());
                 }
                  
-                if (mario.getPosX() < 0) {
-			mario.setPosX(0);
+                if (mario.getPosX() < getWidth()/2) {
+			mario.setPosX(getWidth()/2);
 		}
                 
 		if (mario.getPosY() + mario.getAlto() > getHeight()) {
@@ -185,28 +209,38 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                      mario.setPosY(0);  
                 }
                 
-            if(pelota.getPosY() + pelota.getAlto() > getHeight()){
-                
-                pelota.setPosX(100);
-                pelota.setPosY(100);
-                if(sonido)explosion.play();
-                bolaPerdida+=1;
-                if(bolaPerdida==3){
-                    vidas-=1;
-                    bolaPerdida=0;
-                }
                 
                 //Colision entre objetos
-                if(mario.intersecta(pelota)){
-                    
-                    pelota.setPosX(posXPelota);
-                    pelota.setPosY(posYPelota);
-                    if(sonido)beep.play();
-                    puntos+=2;
+                if (mario.intersecta(pelota)) {
+                    if (sonido) {beep.play();}
+                        vX = (int)(Math.random() * 5 + 13); 
+                        vY = (int)(Math.random() * 12 + 15); 
+                        pelota.setPosX(50);
+                        pelota.setPosY(450);
+                        pelota.setVelocidadY(vY);
+                        puntos += 2; 
+                        click = false;
+                        movido = true;
                 }
-            
-        }
-        }
+                //Colision de la pelota con el applet
+                if (pelota.getPosY() + pelota.getAlto() > getHeight()) {
+                    if (sonido) {
+                        explosion.play();  //reproducre sonido de bala           
+                    }
+                    vX = (int)(Math.random() * 5 + 13);
+                    vY = (int)(Math.random() * 12 + 15);
+                    pelota.setPosX(50);
+                    pelota.setPosY(450);
+                    pelota.setVelocidadY(vY);
+                    bolaPerdida++;
+                    click = false;
+                    movido = true;
+                    if(bolaPerdida==3){
+                    vidas-=1;
+                    bolaPerdida=0;
+                    }
+                }
+              }
       
         /**
 	 * Metodo <I>paint</I> sobrescrito de la clase <code>JFrame</code>,
@@ -282,7 +316,12 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                                      g.setColor(Color.black);
                                      g.drawString("Puntos: " + puntos, 30, 50);
                                      g.drawString("Vidas: " + vidas, 30,65);
-                                     g.drawString("ATRAPA LA PELOTA\n" + "G=Guardar Juego" + "\n",370,250);
+                                     g.drawString("ATRAPA LA PELOTA!!!\n",400,200);
+                                     g.drawString("I: Mostrar/Quitar las instrucciones del juego\n",370,220);
+                                     g.drawString("P: Pausar/Despausar el juego\n",370,240);
+                                     g.drawString("G: Grabar el juego\n",370,260);
+                                     g.drawString("C: Cargar un juego guardado\n",370,280);
+                                     g.drawString("S: Activar/Desactivar sonido",370,300);
                             }
                             else {
 
@@ -290,11 +329,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                             g.drawString("No se cargo la imagen..",20,20);
                         }
                }
-               if(vidas<0){
+               if(vidas<=0){
                   
                   g.setColor(Color.black);
                   g.drawString("Terminaste con puntos: " + puntos, 370, 300);
-                  g.drawString("MADE BY: Ruben Mtz y Angel GZZ",370,250);
+                  g.drawString("MADE BY: Rubén Martínez y Ángel González",370,250);
                   
                   
                }
@@ -379,7 +418,14 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * @param e es el <code>evento</code> generado al presionar el mouse.
 	 */
 	public void mouseClicked(MouseEvent e) {
-    }
+            
+            if (pelota.contiene(e.getX(), e.getY())) {
+                
+                if(!movido){
+                    click = true;
+                }
+            }   
+        }
     
         /**
 	 * Metodo <I>mouseEntered</I> sobrescrito de la interface <code>MouseListener</code>.<P>
@@ -405,9 +451,7 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * @param e es el <code>evento</code> que se genera en al soltar las teclas.
 	 */
     public void mousePressed(MouseEvent e){
-         if (pelota.contiene(e.getX(), e.getY()) && !click) {
-            click = true;
-        }
+        
     }
     
     /**
@@ -416,7 +460,6 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
 	 * @param e es el <code>evento</code> que se genera al soltar el boton del mouse
 	 */
     public void mouseReleased(MouseEvent e){
-        click=false;
     	
     }
     
@@ -430,8 +473,11 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
     
     public void grabaArchivo() throws IOException {
                                                           
-                PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));  
-                fileOut.println(puntos + "\n" + vidas + "\n" + mario.getPosX() + "\n" + mario.getPosY() + "\n" + pelota.getPosX()+ "\n" + pelota.getPosY());
+                PrintWriter fileOut = new PrintWriter(new FileWriter(nombreArchivo));
+                if(click){
+                    move=1;
+                }
+                fileOut.println(puntos + "\n" + vidas + "\n" + mario.getPosX() + "\n" + mario.getPosY() + "\n" + pelota.getPosX()+ "\n" + pelota.getPosY()+ "\n" + pelota.getVelocidadX()+ "\n" + pelota.getVelocidadY()+ "\n" + bolaPerdida + move);
                 fileOut.close();
     }
     
@@ -468,6 +514,25 @@ public class ParabolaJFrame extends JFrame implements Runnable, KeyListener, Mou
                             }
                             case 6:{
                                 pelota.setPosY((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 7:{
+                                pelota.setVelocidadX((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 8:{
+                                pelota.setVelocidadY((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 9:{
+                                bolaPerdida=((Integer.parseInt(dato))); 
+                            break;
+                            }
+                            case 10:{
+                                move=((Integer.parseInt(dato)));
+                                if(move==1){
+                                    click = true;
+                                }
                             break;
                             }
                     }
